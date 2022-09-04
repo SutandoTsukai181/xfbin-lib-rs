@@ -4,7 +4,7 @@ use deku::{ctx, prelude::*};
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian",
-    ctx_default = "ctx::Endian::Big",
+    ctx_default = "ctx::Endian::Big"
 )]
 pub struct Clump {
     pub clump_index: u32,
@@ -27,7 +27,7 @@ pub struct Clump {
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian",
-    ctx_default = "ctx::Endian::Big",
+    ctx_default = "ctx::Endian::Big"
 )]
 pub struct ClumpCoordIndex(pub i16, pub u16);
 
@@ -36,6 +36,6 @@ pub struct ClumpCoordIndex(pub i16, pub u16);
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian",
-    ctx_default = "ctx::Endian::Big",
+    ctx_default = "ctx::Endian::Big"
 )]
 pub struct ParentChildIndex(pub ClumpCoordIndex, pub ClumpCoordIndex);

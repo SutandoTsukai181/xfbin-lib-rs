@@ -209,7 +209,10 @@ impl XfbinChunk {
     pub fn repack(boxed: Box<dyn NuccChunk>) -> Self {
         let mut value = Self::default();
         value.version = boxed.version();
-        value.chunk_buffer = NuccChunkType::write_struct(boxed, value.version).ok().unwrap().into_vec();
+        value.chunk_buffer = NuccChunkType::write_struct(boxed, value.version)
+            .ok()
+            .unwrap()
+            .into_vec();
         value.update().expect("Could not update Xfbin chunk.");
 
         value

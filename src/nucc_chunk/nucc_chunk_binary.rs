@@ -6,7 +6,7 @@ use super::{NuccChunk, NuccChunkType};
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian, version: u16",
-    ctx_default = "ctx::Endian::Big, 0x79",
+    ctx_default = "ctx::Endian::Big, 0x79"
 )]
 pub struct NuccChunkBinary {
     #[deku(skip, default = "version")]

@@ -24,15 +24,15 @@ pub struct XfbinPage {
 impl XfbinPage {
     pub fn has_unknown_chunk(&self) -> bool {
         for nucc_struct in self.structs.iter() {
-            match nucc_struct.chunk_type() {
-                NuccChunkType::NuccChunkUnknown => return true,
-                _ => (),
+            if nucc_struct.chunk_type() == NuccChunkType::NuccChunkUnknown {
+                return true;
             }
         }
 
         false
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn destructure(
         self,
     ) -> (
@@ -115,10 +115,11 @@ impl From<XfbinFile> for Xfbin {
                     let struct_infos_count = struct_infos_count as usize;
                     let struct_references_count = struct_references_count as usize;
 
-                    page.struct_infos =
-                        struct_infos_mapped[struct_infos_index..(struct_infos_index + struct_infos_count)].to_vec();
-                    page.struct_references = struct_references
-                        [struct_references_index..(struct_references_index + struct_references_count)]
+                    page.struct_infos = struct_infos_mapped
+                        [struct_infos_index..(struct_infos_index + struct_infos_count)]
+                        .to_vec();
+                    page.struct_references = struct_references[struct_references_index
+                        ..(struct_references_index + struct_references_count)]
                         .to_vec();
 
                     pages.push(page);
@@ -273,12 +274,12 @@ impl From<Xfbin> for XfbinFile {
             .map(|struct_reference| {
                 let mut chunk_name_index = chunk_name_map.len() as u32;
                 chunk_name_index = *chunk_name_map
-                    .entry(struct_reference.0.clone())
+                    .entry(struct_reference.0)
                     .or_insert(chunk_name_index);
 
                 let mut struct_info_index = struct_infos_map.len() as u32;
                 struct_info_index = *struct_infos_map
-                    .entry(struct_reference.1.clone())
+                    .entry(struct_reference.1)
                     .or_insert(struct_info_index);
 
                 (chunk_name_index, struct_info_index)
@@ -291,17 +292,17 @@ impl From<Xfbin> for XfbinFile {
             .map(|(struct_info, _)| {
                 let mut chunk_type_index = chunk_type_map.len() as u32;
                 chunk_type_index = *chunk_type_map
-                    .entry(struct_info.chunk_type.clone())
+                    .entry(struct_info.chunk_type)
                     .or_insert(chunk_type_index);
 
                 let mut file_path_index = file_path_map.len() as u32;
                 file_path_index = *file_path_map
-                    .entry(struct_info.file_path.clone())
+                    .entry(struct_info.file_path)
                     .or_insert(file_path_index);
 
                 let mut chunk_name_index = chunk_name_map.len() as u32;
                 chunk_name_index = *chunk_name_map
-                    .entry(struct_info.chunk_name.clone())
+                    .entry(struct_info.chunk_name)
                     .or_insert(chunk_name_index);
 
                 XfbinChunkMap {

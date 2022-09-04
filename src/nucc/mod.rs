@@ -1,6 +1,6 @@
-pub mod nucc_unknown;
 pub mod nucc_anm;
 pub mod nucc_binary;
+pub mod nucc_unknown;
 
 use downcast_rs::{impl_downcast, Downcast};
 use hashbrown::HashMap;
@@ -48,7 +48,11 @@ impl<'a> From<XfbinChunkMapConverter<'a>> for Vec<NuccStructInfo> {
 #[derive(Debug, Default, PartialEq, Eq, Clone, Hash)]
 pub struct NuccStructReference(pub String, pub NuccStructInfo);
 
-pub struct XfbinChunkReferenceConverter<'a>(pub Vec<(u32, u32)>, pub &'a [String], pub &'a [NuccStructInfo]);
+pub struct XfbinChunkReferenceConverter<'a>(
+    pub Vec<(u32, u32)>,
+    pub &'a [String],
+    pub &'a [NuccStructInfo],
+);
 
 impl<'a> From<XfbinChunkReferenceConverter<'a>> for Vec<NuccStructReference> {
     fn from(converter: XfbinChunkReferenceConverter<'a>) -> Self {
@@ -115,9 +119,15 @@ impl<'a> From<NuccStructConverter<'a>> for Box<dyn NuccStruct> {
 impl<'a> From<NuccChunkConverter<'a>> for Box<dyn NuccChunk> {
     fn from(converter: NuccChunkConverter) -> Self {
         match converter.0.chunk_type() {
-            NuccChunkType::NuccChunkAnm => Box::<NuccChunkAnm>::from(converter) as Box<dyn NuccChunk>,
-            NuccChunkType::NuccChunkBinary => Box::<NuccChunkBinary>::from(converter) as Box<dyn NuccChunk>,
-            NuccChunkType::NuccChunkUnknown => Box::<NuccChunkUnknown>::from(converter) as Box<dyn NuccChunk>,
+            NuccChunkType::NuccChunkAnm => {
+                Box::<NuccChunkAnm>::from(converter) as Box<dyn NuccChunk>
+            }
+            NuccChunkType::NuccChunkBinary => {
+                Box::<NuccChunkBinary>::from(converter) as Box<dyn NuccChunk>
+            }
+            NuccChunkType::NuccChunkUnknown => {
+                Box::<NuccChunkUnknown>::from(converter) as Box<dyn NuccChunk>
+            }
             any => panic!("Unexpected NuccChunkType: {any}"),
         }
     }

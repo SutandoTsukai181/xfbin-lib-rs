@@ -14,7 +14,7 @@ pub use entry::*;
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian, version: u16",
-    ctx_default = "ctx::Endian::Big, 0x79",
+    ctx_default = "ctx::Endian::Big, 0x79"
 )]
 pub struct NuccChunkAnm {
     #[deku(skip, default = "version")]
@@ -44,7 +44,7 @@ pub struct NuccChunkAnm {
 
     #[deku(count = "other_entry_count")]
     pub other_entry_chunk_indices: Vec<u32>,
-    
+
     #[deku(count = "unk_entry_count")]
     pub unk_entry_chunk_indices: Vec<u32>,
 

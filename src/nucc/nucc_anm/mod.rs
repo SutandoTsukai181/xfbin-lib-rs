@@ -9,6 +9,7 @@ use curve::*;
 use deku::DekuUpdate;
 use entry::*;
 use hashbrown::{HashMap, HashSet};
+use itertools::Itertools;
 
 pub struct NuccAnm {
     pub struct_info: NuccStructInfo,
@@ -39,7 +40,7 @@ impl<'a> From<NuccStructConverter<'a>> for NuccAnm {
                     .iter()
                     .map(|c| {
                         process_coord(
-                            c.clone(),
+                            *c,
                             entry_struct_refs[c.1 as usize].clone(),
                             processed_entries,
                             entries_map,
@@ -52,11 +53,11 @@ impl<'a> From<NuccStructConverter<'a>> for NuccAnm {
                     .collect();
             }
 
-            let entry = entries_map.entry(entry_coord.clone()).or_default();
+            let entry = entries_map.entry(entry_coord).or_default();
             entry.entry_info = EntryInfo::StructRef(entry_struct_ref);
             entry.children = entry_children;
 
-            processed_entries.insert(entry_coord.clone());
+            processed_entries.insert(entry_coord);
         }
 
         fn process_coords(
@@ -88,10 +89,7 @@ impl<'a> From<NuccStructConverter<'a>> for NuccAnm {
         let mut entries_map = HashMap::new();
         for chunk_entry in chunk.entries {
             entries_map
-                .try_insert(
-                    chunk_entry.coord_index.clone(),
-                    entry::Entry::from(chunk_entry),
-                )
+                .try_insert(chunk_entry.coord_index, entry::Entry::from(chunk_entry))
                 .expect("Duplicate animation entries.");
         }
 
@@ -136,7 +134,7 @@ impl<'a> From<NuccStructConverter<'a>> for NuccAnm {
                 .keys()
                 .filter_map(|k| {
                     if k.0 == clump.clump_index as i16 {
-                        Some(k.clone())
+                        Some(*k)
                     } else {
                         None
                     }
@@ -160,13 +158,13 @@ impl<'a> From<NuccStructConverter<'a>> for NuccAnm {
             ))
         }
 
-        let other_entry_struct_infos: Vec<NuccStructInfo> = chunk
+        let other_entry_struct_infos = chunk
             .other_entry_chunk_indices
             .iter()
             .map(|i| struct_infos[*i as usize].clone())
-            .collect();
+            .collect_vec();
 
-        if other_entry_struct_infos.len() != 0 {
+        if !other_entry_struct_infos.is_empty() {
             let mut other_entries = vec![];
 
             for (i, info) in other_entry_struct_infos.iter().enumerate() {
@@ -182,13 +180,13 @@ impl<'a> From<NuccStructConverter<'a>> for NuccAnm {
             clumps.push(other_entries_clump);
         }
 
-        let unk_entry_infos: Vec<NuccStructInfo> = chunk
+        let unk_entry_infos = chunk
             .unk_entry_chunk_indices
             .iter()
             .map(|i| struct_infos[*i as usize].clone())
-            .collect();
+            .collect_vec();
 
-        if unk_entry_infos.len() != 0 {
+        if !unk_entry_infos.is_empty() {
             panic!("Found unk_entry infos. Please report this to the developer.")
         }
 

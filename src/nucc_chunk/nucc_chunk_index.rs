@@ -1,5 +1,5 @@
-use super::{NuccChunk, NuccChunkType};
 use super::super::nucc::NuccStructInfo;
+use super::{NuccChunk, NuccChunkType};
 
 pub struct NuccChunkIndex;
 

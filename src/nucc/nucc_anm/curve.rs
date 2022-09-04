@@ -139,7 +139,7 @@ pub struct CurveChunkConverter(pub Channel, pub CurveHeader, pub ChunkCurve);
 impl From<CurveChunkConverter> for Curve {
     fn from(converter: CurveChunkConverter) -> Self {
         let CurveChunkConverter(channel, header, chunk) = converter;
-        
+
         let interp_type = match header.curve_format {
             CurveFormat::Vector3Fixed
             | CurveFormat::EulerXYZFixed

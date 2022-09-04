@@ -4,7 +4,7 @@ use deku::{ctx, prelude::*};
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian",
-    ctx_default = "ctx::Endian::Big",
+    ctx_default = "ctx::Endian::Big"
 )]
 pub struct CurveHeader {
     pub curve_index: u16,
@@ -98,7 +98,7 @@ impl CurveFormat {
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian, size: usize",
-    ctx_default = "ctx::Endian::Big, 0",
+    ctx_default = "ctx::Endian::Big, 0"
 )]
 pub struct Curve {
     #[deku(count = "size")]

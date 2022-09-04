@@ -7,6 +7,4 @@ pub enum NuccError {
     GenericError,
 }
 
-impl error::Error for NuccError {
-    
-}
+impl error::Error for NuccError {}

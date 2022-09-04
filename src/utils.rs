@@ -30,7 +30,9 @@ impl From<DekuString> for String {
         codepage::to_encoding(932)
             .unwrap()
             .decode(&value.data)
-            .0.trim_end_matches("\0").to_string()
+            .0
+            .trim_end_matches('\0')
+            .to_string()
     }
 }
 

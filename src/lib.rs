@@ -1,9 +1,9 @@
-mod utils;
-mod nucc_chunk;
-mod xfbin_file;
-pub mod nucc;
-pub mod xfbin;
 pub mod error;
+pub mod nucc;
+mod nucc_chunk;
+mod utils;
+pub mod xfbin;
+mod xfbin_file;
 
 use std::fs;
 

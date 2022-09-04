@@ -1,14 +1,14 @@
 use deku::{ctx, prelude::*};
 
-use super::{NuccChunk, NuccChunkType};
 use super::super::nucc::NuccStructInfo;
+use super::{NuccChunk, NuccChunkType};
 
 #[derive(Default)]
 #[deku_derive(DekuRead, DekuWrite)]
 #[deku(
     endian = "endian",
     ctx = "endian: ctx::Endian, version: u16",
-    ctx_default = "ctx::Endian::Big, 0x79",
+    ctx_default = "ctx::Endian::Big, 0x79"
 )]
 pub struct NuccChunkPage {
     #[deku(skip, default = "version")]
