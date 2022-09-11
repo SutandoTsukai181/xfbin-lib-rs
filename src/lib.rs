@@ -5,7 +5,7 @@ mod utils;
 pub mod xfbin;
 mod xfbin_file;
 
-use std::fs;
+use std::{fs, path::Path};
 
 use deku::{bitvec::BitView, DekuError, DekuRead, DekuWrite};
 use utils::*;
@@ -14,7 +14,7 @@ use xfbin_file::*;
 
 pub use nucc_chunk::NuccChunkType;
 
-pub fn read_xfbin(file_path: &str) -> Result<Xfbin, DekuError> {
+pub fn read_xfbin(file_path: &dyn AsRef<Path>) -> Result<Xfbin, DekuError> {
     read_xfbin_bytes(fs::read(file_path).unwrap())
 }
 
@@ -22,7 +22,7 @@ pub fn read_xfbin_bytes(bytes: Vec<u8>) -> Result<Xfbin, DekuError> {
     XfbinFile::read(bytes.view_bits(), ()).map(|(_, value)| value.into())
 }
 
-pub fn write_xfbin(xfbin: Xfbin, file_path: &str) -> Result<(), DekuError> {
+pub fn write_xfbin(xfbin: Xfbin, file_path: &dyn AsRef<Path>) -> Result<(), DekuError> {
     write_xfbin_bytes(xfbin).map(|output| {
         fs::write(file_path, output).unwrap();
     })
