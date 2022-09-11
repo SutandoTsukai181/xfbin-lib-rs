@@ -28,3 +28,13 @@ downcast-rs = "1.2.0"
 
 # Used for sorting a HashMap based on value
 itertools = "0.10.3"
+
+# Used for parsing command line arguments
+clap = { version = "3.2", features = ["derive"] }
+dialoguer = "0.10.2"
+
+# Used for serializing/deserializing into json
+serde = {version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+
+xfbin-nucc-binary = {path = "../xfbin-nucc-binary"}

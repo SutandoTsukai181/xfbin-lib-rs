@@ -1,4 +1,7 @@
-use deku::DekuUpdate;
+use deku::{ctx::Endian, DekuUpdate};
+use strum::IntoEnumIterator;
+
+pub use xfbin_nucc_binary::{NuccBinaryParsed, NuccBinaryParsedConverter, NuccBinaryType};
 
 use super::*;
 
@@ -10,6 +13,24 @@ pub struct NuccBinary {
 }
 
 impl_nucc_info!(NuccBinary, struct_info);
+
+impl NuccBinary {
+    pub fn parse_data(&self, endianness: Option<Endian>) -> Option<Box<dyn NuccBinaryParsed>> {
+        for binary_type in NuccBinaryType::iter() {
+            for (pattern, endian) in binary_type.patterns() {
+                if pattern.is_match(&self.struct_info.file_path) {
+                    return Some(binary_type.convert(&self.data, endianness.unwrap_or(endian)));
+                }
+            }
+        }
+
+        None
+    }
+
+    pub fn update_data(&mut self, nucc_parsed: Box<dyn NuccBinaryParsed>) {
+        self.data = nucc_parsed.into();
+    }
+}
 
 impl<'a> From<NuccStructConverter<'a>> for NuccBinary {
     fn from(converter: NuccStructConverter<'a>) -> Self {

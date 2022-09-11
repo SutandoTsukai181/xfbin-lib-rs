@@ -6,6 +6,7 @@ use std::fmt;
 
 use downcast_rs::{impl_downcast, Downcast};
 use hashbrown::HashMap;
+use serde::{Deserialize, Serialize};
 
 use super::xfbin_file::XfbinChunkMap;
 
@@ -14,7 +15,7 @@ pub use nucc_anm::NuccAnm;
 pub use nucc_binary::NuccBinary;
 pub use nucc_unknown::NuccUnknown;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone, PartialEq, Eq, Hash)]
 pub struct NuccStructInfo {
     pub chunk_name: String,
     pub file_path: String,
