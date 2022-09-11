@@ -2,6 +2,8 @@ pub mod nucc_anm;
 pub mod nucc_binary;
 pub mod nucc_unknown;
 
+use std::fmt;
+
 use downcast_rs::{impl_downcast, Downcast};
 use hashbrown::HashMap;
 
@@ -17,6 +19,16 @@ pub struct NuccStructInfo {
     pub chunk_name: String,
     pub file_path: String,
     pub chunk_type: String,
+}
+
+impl fmt::Display for NuccStructInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{{ Type: \"{}\", Name: \"{}\", Path: \"{}\" }}",
+            self.chunk_type, self.chunk_name, self.file_path
+        )
+    }
 }
 
 pub struct XfbinChunkMapConverter<'a> {
