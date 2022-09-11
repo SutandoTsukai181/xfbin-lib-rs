@@ -233,7 +233,7 @@ impl From<Xfbin> for XfbinFile {
             let page_chunk = repack_struct(
                 Box::new(NuccChunkPage {
                     version: xfbin.version,
-                    map_index_count: page_struct_infos.len() as u32,
+                    map_index_count: 1 + page_struct_infos.len() as u32,
                     reference_count: page_struct_references.len() as u32,
                 }),
                 NuccChunkPage::default_chunk_info(),
