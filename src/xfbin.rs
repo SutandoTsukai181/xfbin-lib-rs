@@ -139,7 +139,7 @@ impl From<XfbinFile> for Xfbin {
                 &struct_references[struct_references_index..],
             ));
 
-            let mut struct_info = parsed_struct.struct_info();
+            let struct_info = parsed_struct.struct_info_mut();
             struct_info.chunk_name = chunk_name.clone();
             struct_info.file_path = file_path.clone();
             struct_info.chunk_type = chunk_type.clone();
@@ -203,7 +203,7 @@ impl From<Xfbin> for XfbinFile {
             );
             chunks.push(null_chunk);
 
-            for mut nucc_struct in page_structs {
+            for nucc_struct in page_structs {
                 let struct_info = nucc_struct.struct_info().clone();
 
                 let boxed = Box::<dyn NuccChunk>::from(NuccChunkConverter(

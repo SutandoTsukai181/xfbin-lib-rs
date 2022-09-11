@@ -71,13 +71,18 @@ impl<'a> From<XfbinChunkReferenceConverter<'a>> for Vec<NuccStructReference> {
 }
 
 pub trait NuccInfo {
-    fn struct_info(&mut self) -> &mut NuccStructInfo;
+    fn struct_info(&self) -> &NuccStructInfo;
+    fn struct_info_mut(&mut self) -> &mut NuccStructInfo;
 }
 
 macro_rules! impl_nucc_info {
     ($struct:ident,$field:ident) => {
         impl NuccInfo for $struct {
-            fn struct_info(&mut self) -> &mut NuccStructInfo {
+            fn struct_info(&self) -> &NuccStructInfo {
+                &self.$field
+            }
+
+            fn struct_info_mut(&mut self) -> &mut NuccStructInfo {
                 &mut self.$field
             }
         }
