@@ -1,7 +1,9 @@
 use deku::{ctx::Endian, DekuUpdate};
 use strum::IntoEnumIterator;
 
-pub use xfbin_nucc_binary::{NuccBinaryParsed, NuccBinaryParsedConverter, NuccBinaryType};
+use xfbin_nucc_binary::{
+    NuccBinaryParsed, NuccBinaryParsedReader, NuccBinaryParsedWriter, NuccBinaryType,
+};
 
 use super::*;
 
@@ -15,11 +17,11 @@ pub struct NuccBinary {
 impl_nucc_info!(NuccBinary, struct_info);
 
 impl NuccBinary {
-    pub fn parse_data(&self, endianness: Option<Endian>) -> Option<Box<dyn NuccBinaryParsed>> {
+    pub fn get_binary_type(&self) -> Option<(NuccBinaryType, Endian)> {
         for binary_type in NuccBinaryType::iter() {
             for (pattern, endian) in binary_type.patterns() {
                 if pattern.is_match(&self.struct_info.file_path) {
-                    return Some(binary_type.convert(&self.data, endianness.unwrap_or(endian)));
+                    return Some((binary_type, endian));
                 }
             }
         }
@@ -27,8 +29,22 @@ impl NuccBinary {
         None
     }
 
-    pub fn update_data(&mut self, nucc_parsed: Box<dyn NuccBinaryParsed>) {
-        self.data = nucc_parsed.into();
+    pub fn parse_data(
+        &self,
+        binary_type_opt: Option<(NuccBinaryType, Endian)>,
+        endianness: Option<Endian>,
+        version: usize,
+    ) -> Option<Box<dyn NuccBinaryParsed>> {
+        binary_type_opt
+            .or_else(|| self.get_binary_type())
+            .map(|(b_type, endian)| {
+                NuccBinaryParsedReader(b_type, &self.data, endianness.unwrap_or(endian), version)
+                    .into()
+            })
+    }
+
+    pub fn update_data(&mut self, nucc_parsed: Box<dyn NuccBinaryParsed>, version: usize) {
+        self.data = NuccBinaryParsedWriter(nucc_parsed, version).into();
     }
 }
 
@@ -60,7 +76,7 @@ impl<'a> From<NuccChunkConverter<'a>> for Box<NuccChunkBinary> {
             data: binary.data,
         };
 
-        chunk.update().expect("Could not update Binary chunk.");
+        chunk.update().expect("Could not update Binary chunk");
 
         Box::new(chunk)
     }

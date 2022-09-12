@@ -12,7 +12,7 @@ use xfbin_lib_rs::{
     nucc::{nucc_binary::NuccBinary, NuccStructInfo},
     read_xfbin, write_xfbin, NuccChunkType,
 };
-use xfbin_nucc_binary::{NuccBinaryParsedConverter, NuccBinaryType};
+use xfbin_nucc_binary::{NuccBinaryParsedDeserializer, NuccBinaryParsedSerializer, NuccBinaryType};
 
 use serde::{Deserialize, Serialize};
 
@@ -33,6 +33,10 @@ struct Args {
     /// Path to binary file. Default is xfbin path with the new file extension.
     #[clap(short, long, value_parser, value_name = "FILE")]
     binary: Option<PathBuf>,
+
+    /// Selected version (index) for reading the binary format. If not given, will be asked for if needed.
+    #[clap(short, long, value_parser)]
+    selected_version: Option<usize>,
 
     /// Endianness for reading the binary.
     #[clap(arg_enum, value_parser, default_value = "auto")]
@@ -75,7 +79,11 @@ enum Endianness {
 enum Commands {
     /// List all supported binary types.
     List {
-        /// List some examples of supported file paths for each binary type.
+        /// List supported versions for each binary type.
+        #[clap(short, long, action)]
+        versions: bool,
+        /// List some examples of supported chunk file paths for each binary type.
+        #[clap(short, long, action)]
         paths: bool,
     },
 }
@@ -127,7 +135,7 @@ fn unpack(args: Args) {
 
     let xfbin = read_xfbin(&args.xfbin).expect("Could not read XFBIN");
 
-    let endian = match args.endian {
+    let endianness = match args.endian {
         Endianness::Auto => None,
         Endianness::Little => Some(Endian::Little),
         Endianness::Big => Some(Endian::Big),
@@ -139,8 +147,31 @@ fn unpack(args: Args) {
             if let NuccChunkType::NuccChunkBinary = nucc_struct.chunk_type() {
                 let binary = nucc_struct.downcast_ref::<NuccBinary>().unwrap();
 
-                if let Some(parsed) = binary.parse_data(endian) {
-                    println!("Found NuccBinaryType: {}", parsed.binary_type());
+                if let Some((binary_type, endian)) = binary.get_binary_type() {
+                    println!("Found NuccBinaryType: {}", binary_type);
+
+                    let version = if let Some(selected_version) = args.selected_version {
+                        selected_version
+                    } else {
+                        let versions = binary_type.version_options();
+                        if versions.is_empty() {
+                            0
+                        } else {
+                            println!();
+                            println!("Select version:");
+
+                            dialoguer::Select::new()
+                                .items(&binary_type.version_options())
+                                .default(0)
+                                .clear(false)
+                                .interact()
+                                .unwrap_or(0)
+                        }
+                    };
+
+                    let parsed = binary
+                        .parse_data(Some((binary_type, endian)), endianness, version)
+                        .unwrap();
 
                     let mut extension = parsed.extension(args.json);
                     extension = if counter != 0 {
@@ -168,13 +199,17 @@ fn unpack(args: Args) {
                         continue;
                     }
 
-                    fs::write(output_path.clone(), parsed.serialize(args.json))
-                        .expect("Could not write binary file");
+                    fs::write(
+                        output_path.clone(),
+                        Vec::<u8>::from(NuccBinaryParsedSerializer(parsed, args.json)),
+                    )
+                    .expect("Could not write binary file");
 
                     let meta_data = MetaData {
                         page_index,
-                        binary_type: parsed.binary_type().to_string(),
+                        binary_type: binary_type.to_string(),
                         binary_file_name: output_path
+                            .clone()
                             .file_name()
                             .unwrap()
                             .to_str()
@@ -255,10 +290,10 @@ fn repack(args: Args) {
         binary_path.file_name().unwrap().to_str().unwrap()
     );
     let binary_data = fs::read(binary_path).expect("Could not read binary file");
-    let converter = NuccBinaryParsedConverter(binary_type, args.json, binary_data);
+    let converter = NuccBinaryParsedDeserializer(binary_type, args.json, binary_data);
 
     let binary = nucc_struct.downcast_mut::<NuccBinary>().unwrap();
-    binary.update_data(converter.into());
+    binary.update_data(converter.into(), args.selected_version.unwrap_or_default());
 
     println!(
         "Writing XFBIN: \"{}\"...",
@@ -282,11 +317,25 @@ fn repack(args: Args) {
     println!("Repacking done.");
 }
 
-fn list(print_paths: bool) {
+fn list(print_versions: bool, print_paths: bool) {
     println!("Supported binary types:");
 
     for binary_type in NuccBinaryType::iter() {
         println!("  {}", binary_type);
+
+        let versions = binary_type.version_options();
+        if print_versions {
+            if !versions.is_empty() {
+                println!("  versions:");
+                for (i, version) in versions.iter().enumerate() {
+                    println!("      {} - {}", i, version);
+                }
+            } else {
+                println!("  versions: none");
+            }
+
+            println!();
+        }
 
         if print_paths {
             println!("  examples:");
@@ -311,8 +360,8 @@ fn main() {
 
     if let Some(commands) = args.commands {
         match commands {
-            Commands::List { paths } => {
-                list(paths);
+            Commands::List { versions, paths } => {
+                list(versions, paths);
             }
         }
     } else {
