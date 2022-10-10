@@ -10,7 +10,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 # Used for reading/writing all serializable structs
-deku = "0.13.1"
+deku = "0.14.1"
 
 # More efficient alternative for std::collections::HashMap
 hashbrown = "0.12"
