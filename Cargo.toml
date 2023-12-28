@@ -13,7 +13,7 @@ license = "MIT OR Apache-2.0"
 deku = "0.13.1"
 
 # More efficient alternative for std::collections::HashMap
-hashbrown = "0.12"
+hashbrown = "0.13"
 
 # Used for reading strings with SHIFT-JIS (codepage 932)
 encoding_rs = "0.8.31"
